@@ -3,24 +3,30 @@ use sysinfo::System;
 use sysinfo::SystemExt;
 
 fn main() {
-    for disk in get_local_disks() {
+    let sys: &mut System = &mut System::new_all();
+    let disks: &[Disk] = get_local_disks(sys);
+    for disk in disks {
         println!("{:?}", disk);
     }
 }
 
-fn get_local_disks() -> &'static [Disk] {
-    let mut sys = System::new_all();
+fn get_local_disks(sys: &mut System) -> &[Disk] {
     sys.refresh_all();
-    return sys.disks();
+    sys.disks()
 }
 
 #[cfg(test)]
 mod tests {
     use super::get_local_disks;
+    use super::Disk;
+    use super::System;
+    use super::SystemExt;
 
     #[test]
     fn test_get_local_disks() {
-        let disks = get_local_disks();
+        let sys: &mut System = &mut System::new_all();
+        let disks: &[Disk] = get_local_disks(sys);
+
         assert!(disks.len() > 0);
     }
 }
