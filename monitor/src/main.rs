@@ -1,8 +1,11 @@
+use human_bytes::human_bytes;
+use log::info;
 use sysinfo::Disk;
 use sysinfo::System;
 use sysinfo::SystemExt;
 
 fn main() {
+    info!("Disk space monitor 0.1");
     let sys: &mut System = &mut System::new_all();
     let disks: &[Disk] = get_local_disks(sys);
     for disk in disks {
@@ -15,8 +18,13 @@ fn get_local_disks(sys: &mut System) -> &[Disk] {
     sys.disks()
 }
 
+fn get_human_readable_bytes(bytes: i64) -> String {
+    human_bytes(bytes)
+}
+
 #[cfg(test)]
 mod tests {
+    use super::get_human_readable_bytes;
     use super::get_local_disks;
     use super::Disk;
     use super::System;
@@ -26,7 +34,11 @@ mod tests {
     fn test_get_local_disks() {
         let sys: &mut System = &mut System::new_all();
         let disks: &[Disk] = get_local_disks(sys);
-
         assert!(disks.len() > 0);
+    }
+
+    #[test]
+    fn test_get_human_readable_bytes() {
+        assert!(get_human_readable_bytes(699050250240) == "651GB".to_string());
     }
 }
