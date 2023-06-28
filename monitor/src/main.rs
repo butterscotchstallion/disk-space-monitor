@@ -18,14 +18,10 @@ fn get_local_disks(sys: &mut System) -> &[Disk] {
     sys.disks()
 }
 
-fn get_human_readable_bytes(bytes: i64) -> String {
-    human_bytes(bytes)
-}
-
 #[cfg(test)]
 mod tests {
-    use super::get_human_readable_bytes;
     use super::get_local_disks;
+    use super::human_bytes::human_bytes;
     use super::Disk;
     use super::System;
     use super::SystemExt;
@@ -39,6 +35,6 @@ mod tests {
 
     #[test]
     fn test_get_human_readable_bytes() {
-        assert!(get_human_readable_bytes(699050250240) == "651GB".to_string());
+        assert!(human_bytes(699050250240) == "651GB".to_string());
     }
 }
