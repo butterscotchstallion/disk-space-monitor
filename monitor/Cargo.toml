@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 human_bytes = "0.4.2"
 log = "0.4.19"
-sysinfo = "0.29.2"
+sysinfo = "0.38.0"
