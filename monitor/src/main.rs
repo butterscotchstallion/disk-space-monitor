@@ -3,7 +3,7 @@ use sysinfo::{Disks};
 use dioxus::prelude::*;
 
 fn main() {
-    info!("Disk space monitor 0.1");
+    info!("Disk Space Monitor 0.1");
     let disks: Disks = get_local_disks();
     for disk in &disks {
         println!("{} ({}% free)\n", format!(
@@ -18,6 +18,10 @@ fn main() {
 
 fn app() -> Element {
     rsx! {
+        Stylesheet { href: asset!("assets/monitor.css") }
+        h1 {
+            "Disk Space Monitor"
+        }
         div {
             "hello world!"
         }
