@@ -1,7 +1,6 @@
 use log::info;
 use sysinfo::{Disks};
-
-
+use dioxus::prelude::*;
 
 fn main() {
     info!("Disk space monitor 0.1");
@@ -13,6 +12,15 @@ fn main() {
             get_free_disk_space_percentage((disk.total_space() - disk.available_space()) as i64,
                                            disk.total_space() as i64)
         );
+    }
+    launch(app);
+}
+
+fn app() -> Element {
+    rsx! {
+        div {
+            "hello world!"
+        }
     }
 }
 
