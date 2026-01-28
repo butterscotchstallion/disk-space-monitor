@@ -1,29 +1,71 @@
+use std::collections::HashMap;
+use std::ffi::OsStr;
 use log::info;
 use sysinfo::{Disks};
 use dioxus::prelude::*;
+use dioxus_desktop::{WindowBuilder};
+use tao::dpi::{LogicalPosition, PhysicalSize};
 
 fn main() {
     info!("Disk Space Monitor 0.1");
-    let disks: Disks = get_local_disks();
-    for disk in &disks {
-        println!("{} ({}% free)\n", format!(
-            "[{:?}]",
-            disk.name()),
-            get_free_disk_space_percentage((disk.total_space() - disk.available_space()) as i64,
-                                           disk.total_space() as i64)
-        );
-    }
-    launch(app);
+    LaunchBuilder::new()
+        .with_cfg(make_config())
+        .launch(app);
+}
+
+fn make_config() -> dioxus_desktop::Config {
+    dioxus_desktop::Config::default()
+        .with_window(make_window())
+}
+
+fn make_window() -> WindowBuilder {
+    WindowBuilder::new()
+        .with_transparent(false)
+        .with_decorations(true)
+        .with_resizable(false)
+        .with_always_on_top(false)
+        .with_position(LogicalPosition::new(600, 300))
+        .with_title("Disk Space Monitor")
+        .with_inner_size(PhysicalSize::new(600, 200))
 }
 
 fn app() -> Element {
+    let disks: Disks = get_local_disks();
+    let mut disk_space_map: HashMap<&OsStr, i32> = HashMap::new();
+    for disk in &disks {
+        let free_space_pct: i32 = get_free_disk_space_percentage(
+            (disk.total_space() - disk.available_space()) as i64,
+            disk.total_space() as i64
+        );
+        println!(
+            "{} ({}% free)\n",
+            format!(
+                "[{:?}]",
+                disk.name()
+            ),
+            get_free_disk_space_percentage(
+                (disk.total_space() - disk.available_space()) as i64,
+                disk.total_space() as i64
+            )
+        );
+        disk_space_map.insert(disk.name(), free_space_pct);
+    }
     rsx! {
-        Stylesheet { href: asset!("assets/monitor.css") }
-        h1 {
-            "Disk Space Monitor"
-        }
-        div {
-            "hello world!"
+        Stylesheet { href: asset!("/assets/tailwind.css") }
+        Stylesheet { href: asset!("/assets/monitor.css") }
+        div { class: "p-4 bg-slate-300 h-screen",
+            h2 { class: "text-2xl font-bold mb-2", "Disk Space Monitor" }
+
+            for (disk_name, free_space_pct) in disk_space_map {
+                h4 { class: "text-lg mb-1", "{disk_name:?}" }
+                div {
+                    class: "w-full bg-gray-200 rounded-full h-2",
+                    div {
+                        class: "bg-purple-400 h-2 rounded-full",
+                        style: "width: {free_space_pct}%"
+                    }
+                }
+            }
         }
     }
 }

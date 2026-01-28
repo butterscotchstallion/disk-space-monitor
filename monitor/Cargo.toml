@@ -8,10 +8,14 @@ publish = false
 
 [dependencies]
 dioxus = "0.7.3"
+dioxus-desktop = "0.7.3"
 log = "0.4.19"
 sysinfo = "0.38.0"
+tao = "0.34.5"
 
 [features]
 default = ["desktop"]
+web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
-native = ["dioxus/native"]
+mobile = ["dioxus/mobile"]
+

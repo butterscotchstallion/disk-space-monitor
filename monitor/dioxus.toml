@@ -31,9 +31,9 @@ watch_path = ["src", "assets"]
 
 # CSS style file
 
-style = []
+style = ["monitor.css", "tailwind.css"]
 
-# Javascript code file
+# JavaScript code file
 script = []
 
 [web.resource.dev]
