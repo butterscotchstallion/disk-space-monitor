@@ -37,12 +37,13 @@ fn app() -> Element {
     }
     let mut disk_space_map: HashMap<&OsStr, DiskInfo> = HashMap::new();
     for disk in &disks {
-        let avail_space_pct: i32 = 100 - get_free_disk_space_percentage(
+        let free_space_pct: i32 = get_free_disk_space_percentage(
             (disk.total_space() - disk.available_space()) as i64,
             disk.total_space() as i64
         );
+        let avail_space_pct: i32 = 100 - free_space_pct;
         println!(
-            "{} ({}% free)\n",
+            "{} ({}% available)\n",
             format!(
                 "[{:?}]",
                 disk.name()
