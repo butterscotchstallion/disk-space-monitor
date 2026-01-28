@@ -26,7 +26,7 @@ fn make_window() -> WindowBuilder {
         .with_always_on_top(false)
         .with_position(LogicalPosition::new(600, 300))
         .with_title("Disk Space Monitor")
-        .with_inner_size(PhysicalSize::new(600, 200))
+        .with_inner_size(PhysicalSize::new(600, 300))
 }
 
 fn app() -> Element {
@@ -43,10 +43,7 @@ fn app() -> Element {
                 "[{:?}]",
                 disk.name()
             ),
-            get_free_disk_space_percentage(
-                (disk.total_space() - disk.available_space()) as i64,
-                disk.total_space() as i64
-            )
+            free_space_pct
         );
         disk_space_map.insert(disk.name(), free_space_pct);
     }
@@ -57,12 +54,14 @@ fn app() -> Element {
             h2 { class: "text-2xl font-bold mb-2", "Disk Space Monitor" }
 
             for (disk_name, free_space_pct) in disk_space_map {
-                h4 { class: "text-lg mb-1", "{disk_name:?}" }
-                div {
-                    class: "w-full bg-gray-200 rounded-full h-2",
+                div { class: "mb-4",
+                    h4 { class: "text-lg mb-1", "{disk_name.to_string_lossy()}" }
                     div {
-                        class: "bg-purple-400 h-2 rounded-full",
-                        style: "width: {free_space_pct}%"
+                        class: "w-full bg-gray-200 rounded-full h-2",
+                        div {
+                            class: "bg-purple-400 h-2 rounded-full",
+                            style: "width: {free_space_pct}%"
+                        }
                     }
                 }
             }
