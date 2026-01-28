@@ -51,13 +51,16 @@ fn app() -> Element {
         );
         disk_space_map.insert(disk.name(), DiskInfo {
             available_space_pct: avail_space_pct,
-            available_space_human_bytes: format!("{:.2} GB", disk.available_space() as f64 / (1024.0 * 1024.0 * 1024.0))
+            available_space_human_bytes: format!(
+                "{:.2} GB",
+                disk.available_space() as f64 / (1024.0 * 1024.0 * 1024.0)
+            )
         });
     }
     rsx! {
         Stylesheet { href: asset!("/assets/tailwind.css") }
         Stylesheet { href: asset!("/assets/monitor.css") }
-        div { class: "p-4 bg-slate-300 h-screen",
+        div { class: "p-4 bg-slate-400 h-screen",
             h2 { class: "text-3xl font-bold mb-3", "Disk Space Monitor" }
 
             for (disk_name, info) in disk_space_map {
@@ -69,7 +72,7 @@ fn app() -> Element {
                     div {
                         class: "w-full bg-gray-200 rounded-full h-2",
                         div {
-                            class: "bg-purple-400 h-2 rounded-full",
+                            class: "bg-purple-800 h-2 rounded-full",
                             style: "width: {info.available_space_pct}%"
                         }
                     }
