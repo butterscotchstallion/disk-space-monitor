@@ -31,9 +31,13 @@ fn make_window() -> WindowBuilder {
 
 fn app() -> Element {
     let disks: Disks = get_local_disks();
-    let mut disk_space_map: HashMap<&OsStr, i32> = HashMap::new();
+    struct DiskInfo {
+        available_space_pct: i32,
+        available_space_human_bytes: String
+    }
+    let mut disk_space_map: HashMap<&OsStr, DiskInfo> = HashMap::new();
     for disk in &disks {
-        let free_space_pct: i32 = get_free_disk_space_percentage(
+        let avail_space_pct: i32 = 100 - get_free_disk_space_percentage(
             (disk.total_space() - disk.available_space()) as i64,
             disk.total_space() as i64
         );
@@ -43,24 +47,30 @@ fn app() -> Element {
                 "[{:?}]",
                 disk.name()
             ),
-            free_space_pct
+            avail_space_pct
         );
-        disk_space_map.insert(disk.name(), free_space_pct);
+        disk_space_map.insert(disk.name(), DiskInfo {
+            available_space_pct: avail_space_pct,
+            available_space_human_bytes: format!("{:.2} GB", disk.available_space() as f64 / (1024.0 * 1024.0 * 1024.0))
+        });
     }
     rsx! {
         Stylesheet { href: asset!("/assets/tailwind.css") }
         Stylesheet { href: asset!("/assets/monitor.css") }
         div { class: "p-4 bg-slate-300 h-screen",
-            h2 { class: "text-2xl font-bold mb-2", "Disk Space Monitor" }
+            h2 { class: "text-3xl font-bold mb-3", "Disk Space Monitor" }
 
-            for (disk_name, free_space_pct) in disk_space_map {
+            for (disk_name, info) in disk_space_map {
                 div { class: "mb-4",
-                    h4 { class: "text-lg mb-1", "{disk_name.to_string_lossy()}" }
+                    h4 {
+                        class: "text-lg mb-1",
+                        "{disk_name.to_string_lossy()} ({info.available_space_human_bytes} available)"
+                    }
                     div {
                         class: "w-full bg-gray-200 rounded-full h-2",
                         div {
                             class: "bg-purple-400 h-2 rounded-full",
-                            style: "width: {free_space_pct}%"
+                            style: "width: {info.available_space_pct}%"
                         }
                     }
                 }
@@ -80,6 +90,14 @@ fn get_free_disk_space_percentage(written_bytes: i64, total_bytes: i64) -> i32 {
     }
     let free_space: i64 = total_bytes - written_bytes;
     (free_space * 100 / total_bytes) as i32
+}
+
+fn get_available_disk_space_percentage(written_bytes: i64, total_bytes: i64) -> i32 {
+    if total_bytes == 0 {
+        return 0;
+    }
+    let free_space: i64 = total_bytes - written_bytes;
+    ((free_space / total_bytes) * 100) as i32
 }
 
 fn get_low_disk_space_drives(disks: Disks, low_space_threshold_percentage: i32) -> Vec<String> {
