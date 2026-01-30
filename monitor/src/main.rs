@@ -1,16 +1,57 @@
 use std::collections::HashMap;
 use std::ffi::OsStr;
+use std::sync::mpsc;
 use log::info;
 use sysinfo::{Disks};
 use dioxus::prelude::*;
 use dioxus_desktop::{WindowBuilder};
+use dioxus_desktop::muda::{Menu};
+use dioxus_desktop::trayicon::{Icon, TrayIconBuilder};
 use tao::dpi::{LogicalPosition, PhysicalSize};
 
 fn main() {
     info!("Disk Space Monitor 0.1");
+
+    // Create channel to keep tray alive
+    let (tx, rx) = mpsc::channel::<KeyCode>();
+
+    std::thread::spawn(move || {
+        setup_tray_icon();
+        // Keep thread alive by waiting on channel
+        let _ = rx.recv();
+    });
+
     LaunchBuilder::new()
         .with_cfg(make_config())
         .launch(app);
+}
+
+fn setup_tray_icon() {
+    let menu = Menu::new();
+
+    // Use relative path from project root
+    if let Ok(icon_data) = std::fs::read("assets/disk_space_monitor_icon.ico") {
+        match Icon::from_rgba(icon_data, 256, 256) {
+            Ok(icon) => {
+                match TrayIconBuilder::new()
+                    .with_menu(Box::new(menu))
+                    .with_tooltip("Disk Space Monitor")
+                    .with_icon(icon)
+                    .build()
+                {
+                    Ok(tray) => {
+                        info!("Tray icon created successfully");
+                        // Keep tray alive by not dropping it
+                        std::mem::forget(tray);
+                    },
+                    Err(e) => eprintln!("Failed to build tray icon: {:?}", e),
+                }
+            },
+            Err(e) => eprintln!("Failed to load icon: {:?}", e),
+        }
+    } else {
+        eprintln!("Failed to read icon file at assets/disk_space_monitor_icon.ico");
+    }
 }
 
 fn make_config() -> dioxus_desktop::Config {
@@ -19,6 +60,9 @@ fn make_config() -> dioxus_desktop::Config {
 }
 
 fn make_window() -> WindowBuilder {
+    // let icon_data: &[u8] = include_bytes!("../assets/disk_space_monitor_icon.ico");
+    // let icon: Icon = Icon::from_rgba(icon_data.to_vec(), 64, 64)
+    //     .expect("Failed to load window icon");
     WindowBuilder::new()
         .with_transparent(false)
         .with_decorations(true)
@@ -26,7 +70,8 @@ fn make_window() -> WindowBuilder {
         .with_always_on_top(false)
         .with_position(LogicalPosition::new(600, 300))
         .with_title("Disk Space Monitor")
-        .with_inner_size(PhysicalSize::new(600, 300))
+        .with_inner_size(PhysicalSize::new(600, 250))
+        //.with_window_icon(Some(icon))
 }
 
 fn app() -> Element {
@@ -43,7 +88,7 @@ fn app() -> Element {
         );
         let avail_space_pct: i32 = 100 - free_space_pct;
         println!(
-            "{} ({}% available)\n",
+            "{} ({}% used)\n",
             format!(
                 "[{:?}]",
                 disk.name()

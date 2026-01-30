@@ -41,3 +41,8 @@ script = []
 # Javascript code file
 # serve: [dev-server] only
 script = []
+
+[bundle]
+icon = ["/assets/disk_space_monitor_icon.ico"]
+identifier = "com.diskspacemonitor"
+publisher = "DiskSpaceMonitor"

@@ -6,12 +6,15 @@ publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+
+
 [dependencies]
 dioxus = "0.7.3"
 dioxus-desktop = "0.7.3"
 log = "0.4.19"
 sysinfo = "0.38.0"
 tao = "0.34.5"
+tray-icon = "0.14"
 
 [features]
 default = ["desktop"]
